@@ -34,6 +34,15 @@ Redmine.prototype = {
   },
 
   /**
+   * get_root_uri:
+   *
+   * Get a URI object for talking to the server.
+   */
+  get_root_uri: function () {
+    return this.get_uri().directory('');
+  },
+
+  /**
    * load_issues:
    *
    * Load the issues for the project this Redmine was constructed with.
@@ -271,14 +280,24 @@ Redmine.prototype = {
    * load_versions:
    */
   load_versions: function (callback) {
-    this._load_simple('versions', 'versions');
+    this._load_simple(
+      this.get_uri()
+      .filename('versions.json'),
+      'versions',
+      callback
+    );
   },
 
   /**
    * load_projects:
    */
   load_projects: function (callback) {
-    this._load_simple('projects', 'projects');
+    this._load_simple(
+      this.get_root_uri()
+      .filename('projects.json'),
+      'projects',
+      callback
+    );
   },
 
   /**
@@ -286,13 +305,13 @@ Redmine.prototype = {
    *
    * For some really trivial loading
    */
-  _load_simple: function (json_name, root_key, callback) {
-    d3.jsonp(this.get_uri()
-        .filename(json_name, '.json')
-        .normalize(),
-        function (data) {
-          callback(data[root_key]);
-        });
+  _load_simple: function (uri, root_key, callback) {
+    d3.jsonp(
+      uri.normalize(),
+      function (data) {
+        callback(data[root_key]);
+      }
+    );
   },
 
   /**
