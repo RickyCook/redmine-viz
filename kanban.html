@@ -11,21 +11,34 @@
     <script src="bower_components/d3/d3.min.js"></script>
     <script src="bower_components/uri.js/src/URI.min.js"></script>
     <script src="bower_components/modernizr/modernizr.js"></script>
+    <script src="bower_components/jquery/jquery.min.js"></script>
+    <script src="bower_components/bootstrap/js/bootstrap-dropdown.js"></script>
     <script src="jsonp.js"></script>
 
     <script src="config.js"></script>
     <script src="redmine.js"></script>
+    <script src="shared-ui.js"></script>
     <script src="kanban.js"></script>
   </head>
 
   <body>
+    <div id="projects" class="btn-group">
+      <a class="btn btn-large dropdown-toggle" data-toggle="dropdown" href="#">
+        <span id="projects-current">Projects</span>
+        <span class="caret"></span>
+      </a>
+      <ul id="projects-list" class="dropdown-menu">
+        <!-- dropdown menu links -->
+      </ul>
+    </div>
   </body>
 
   <script type="text/javascript">
 
-    var redmine = new Redmine();
-    var viz = new Kanban(redmine);
-
-    viz.load();
+    var ui = new SharedUI(function (redmine) {
+      var viz = new Kanban(redmine);
+      viz.load();
+    });
+    
   </script>
 </html>
