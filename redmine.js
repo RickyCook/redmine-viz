@@ -271,13 +271,27 @@ Redmine.prototype = {
    * load_versions:
    */
   load_versions: function (callback) {
-    var self = this;
+    this._load_simple('versions', 'versions');
+  },
 
-    d3.jsonp(self.get_uri()
-        .filename('versions.json')
+  /**
+   * load_projects:
+   */
+  load_projects: function (callback) {
+    this._load_simple('projects', 'projects');
+  },
+
+  /**
+   * _load_simple:
+   *
+   * For some really trivial loading
+   */
+  _load_simple: function (json_name, root_key, callback) {
+    d3.jsonp(this.get_uri()
+        .filename(json_name, '.json')
         .normalize(),
         function (data) {
-          callback(data.versions);
+          callback(data[root_key]);
         });
   },
 
