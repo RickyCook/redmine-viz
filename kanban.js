@@ -99,6 +99,9 @@ Kanban.prototype = {
         y = this.y,
         svg = this.svg;
 
+    /* clear the previously loaded data (if any) */
+    svg.selectAll('rect').remove();
+
     /* create a single bar */
     var projects = svg.append('g')
         .attr('class', 'status')
