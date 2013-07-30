@@ -56,12 +56,15 @@ Redmine.prototype = {
         .filename('issues.json')
         .addSearch('limit', LIMIT);
 
+    var updated;
     if (status) {
       uri.addSearch('status_id', status);
+      updated = self._get_cached_issues_updated(status);
+    } else {
+      updated = self._get_cached_issues_updated();
     }
 
     /* Add filter to disclude results that are in the cache */
-    var updated = self._get_cached_issues_updated();
     if (typeof updated != 'undefined') {
       /* Create the date string for redmine */
       updated = d3.time.format('%Y-%m-%d')(new Date(updated));
@@ -113,7 +116,7 @@ Redmine.prototype = {
     this._put_cached('issues.' + issue.id, issue);
 
     /* Update the last updated */
-    this._update_last_updated(Date.parse(issue.updated_on));
+    this._update_last_updated(Date.parse(issue.updated_on), issue.status.id);
     
     /* Update the ids list */
     if (!isset) {
@@ -127,11 +130,11 @@ Redmine.prototype = {
    * Updates the latest cached update date if it's newer. And returns true if
    * this was a new latest update or false if the cached date was newer.
    */
-  _update_last_updated: function(updated_on) {
-    var cache_updated = this._get_cached_issues_updated();
+  _update_last_updated: function(updated_on, status) {
+    var cache_updated = this._get_cached_issues_updated(status);
     if (typeof cache_updated == 'undefined') cache_updated = 0;
     if (updated_on > cache_updated) {
-      this._put_cached('issues.updated', updated_on);
+      this._put_cached('issues.' + status + '.updated', updated_on);
       return true;
     }
     return false;
@@ -232,11 +235,26 @@ Redmine.prototype = {
    * Integer representation compatible with Date objects for the last update on
    * issues in the cache.
    */
-  _get_cached_issues_updated: function() {
-    var updated = this._get_cached(
-      'issues.updated',
-      undefined
-    );
+  _get_cached_issues_updated: function(status) {
+    var updated;
+    if (typeof status == 'undefined') {
+      for (var i = 0; i < FILTER_STATUSES.length; i++) {
+        var s_updated = _get_cached_issues_updated(FILTER_STATUSES[i]);
+
+        // Get miniumum updated across all statuses
+        // An undefined value is absolute lowest (never loaded)
+        if (typeof s_updated == 'undefined') {
+          return undefined;
+        } else if (typeof updated == 'undefined' || s_updated < updated) {
+          updated = s_updated;
+        }
+      };
+    } else {
+      updated = this._get_cached(
+        'issues.' + status + '.updated',
+        undefined
+      );
+    }
     return updated == undefined ? undefined : parseInt(updated);
   },
 
